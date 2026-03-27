@@ -66,8 +66,13 @@ class _LogoState extends State<Logo> {
 
   Widget build(BuildContext context) {
     return Animate(
-      effects: [FadeEffect(delay: 500.ms), ScaleEffect(duration: 500.ms)],
-        child: Image(image: AssetImage('assets/images/logo.png'))
+      effects: const [FadeEffect(delay: Duration(milliseconds: 500)), ScaleEffect(duration: Duration(milliseconds: 500))],
+        child: const Image(
+          image: AssetImage('assets/images/logo.png'),
+          width: 250,
+          height: 250,
+          fit: BoxFit.contain,
+        )
     );
   }
 }

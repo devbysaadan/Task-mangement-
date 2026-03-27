@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../controllers/task_controller.dart';
+import '../../controllers/theme_controller.dart';
 import '../../models/task_model.dart';
+import '../../widgets/profile_bottom_sheet.dart';
 import 'task_form.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,6 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TaskController controller = Get.put(TaskController());
+  final ThemeController themeController = Get.find<ThemeController>();
 
   Color _getStatusColor(TaskStatus status) {
     switch (status) {
@@ -27,15 +31,34 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  bool get isDark => themeController.isDarkMode.value;
+  Color get bgColor => isDark ? const Color(0xff121212) : const Color(0xffF8F9FA);
+  Color get cardColor => isDark ? const Color(0xff1E1E1E) : Colors.white;
+  Color get textColor => isDark ? Colors.white : const Color(0xff2A0A4A);
+  Color get subTextColor => isDark ? Colors.grey[400]! : Colors.grey[600]!;
+  Color get shadowColor => isDark ? Colors.black87 : Colors.black.withOpacity(0.06);
+  Color get gradientStart => isDark ? const Color(0xff120324) : const Color(0xff3c096c);
+  Color get gradientEnd => isDark ? const Color(0xff2a0a4a) : const Color(0xff7b2cbf);
+  Color get bgGradientEnd => isDark ? const Color(0xff2a0a4a).withOpacity(0.5) : const Color(0xffE0AAFF).withOpacity(0.15);
+  Color get inputBgColor => isDark ? const Color(0xff2A2A2A) : Colors.white;
+
+  void _showProfileBottomSheet(BuildContext context) {
+    Get.bottomSheet(
+      const ProfileBottomSheet(),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF8F9FA),
+    return Obx(() => Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xff3c096c), Color(0xff7b2cbf)],
+              colors: [gradientStart, gradientEnd],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -51,6 +74,19 @@ class _HomePageState extends State<HomePage> {
             letterSpacing: 0.5,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: GestureDetector(
+              onTap: () => _showProfileBottomSheet(context),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.white24,
+                backgroundImage: AssetImage('assets/images/${GetStorage().read('avatar') ?? 'boy'}.png'),
+              ),
+            ),
+          )
+        ],
         backgroundColor: Colors.transparent,
         elevation: 0,
         bottom: PreferredSize(
@@ -64,7 +100,7 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
+                          color: shadowColor,
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
@@ -72,13 +108,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: TextField(
                       onChanged: controller.updateSearchQuery,
-                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: textColor),
                       decoration: InputDecoration(
                         hintText: 'Search tasks...',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: TextStyle(color: subTextColor),
                         filled: true,
-                        fillColor: Colors.white,
-                        prefixIcon: const Icon(Icons.search, color: Color(0xff3c096c)),
+                        fillColor: inputBgColor,
+                        prefixIcon: Icon(Icons.search, color: isDark ? Colors.white70 : const Color(0xff3c096c)),
                         contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
@@ -89,14 +125,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Obx(() => Container(
+                Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: inputBgColor,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.12),
+                            color: shadowColor,
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -105,23 +141,24 @@ class _HomePageState extends State<HomePage> {
                       child: DropdownButton<TaskStatus?>(
                         value: controller.filterStatus.value,
                         underline: const SizedBox(),
-                        iconEnabledColor: const Color(0xff3c096c),
-                        style: const TextStyle(
+                        iconEnabledColor: isDark ? Colors.white70 : const Color(0xff3c096c),
+                        dropdownColor: cardColor,
+                        style: TextStyle(
                           fontFamily: 'Poppins',
-                          color: Color(0xff3c096c),
+                          color: isDark ? Colors.white : const Color(0xff3c096c),
                           fontWeight: FontWeight.bold,
                         ),
-                        hint: const Text("All", style: TextStyle(fontFamily: 'Poppins')),
+                        hint: Text("All", style: TextStyle(fontFamily: 'Poppins', color: textColor)),
                         items: [
-                          const DropdownMenuItem(value: null, child: Text("All")),
+                          DropdownMenuItem(value: null, child: Text("All", style: TextStyle(color: textColor))),
                           ...TaskStatus.values.map((s) => DropdownMenuItem(
                                 value: s,
-                                child: Text(s.name.toUpperCase()),
+                                child: Text(s.name.toUpperCase(), style: TextStyle(color: textColor)),
                               ))
                         ],
                         onChanged: controller.updateFilterStatus,
                       ),
-                    )),
+                    ),
               ],
             ),
           ),
@@ -132,37 +169,33 @@ class _HomePageState extends State<HomePage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [const Color(0xffF8F9FA), const Color(0xffE0AAFF).withOpacity(0.15)],
+            colors: [bgColor, bgGradientEnd],
           )
         ),
-        child: Obx(() {
-          if (controller.tasks.isEmpty) {
-            return Center(
+        child: controller.tasks.isEmpty ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.assignment_rounded, size: 60, color: Colors.grey[300]),
+                  Icon(Icons.assignment_rounded, size: 60, color: isDark ? Colors.grey[800] : Colors.grey[300]),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     "No tasks yet. Add some!",
-                    style: TextStyle(fontFamily: 'Poppins', color: Colors.grey, fontSize: 18),
+                    style: TextStyle(fontFamily: 'Poppins', color: subTextColor, fontSize: 18),
                   ),
                 ],
               ).animate().fadeIn(duration: 600.ms).scaleXY(begin: 0.8, end: 1.0, duration: 600.ms, curve: Curves.easeOutBack),
-            );
-          }
-
+            ) : (() {
           final filtered = controller.filteredTasks;
           if (filtered.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search_off_rounded, size: 60, color: Colors.grey[300]),
+                  Icon(Icons.search_off_rounded, size: 60, color: isDark ? Colors.grey[800] : Colors.grey[300]),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     "No tasks match your search.",
-                    style: TextStyle(fontFamily: 'Poppins', color: Colors.grey, fontSize: 18),
+                    style: TextStyle(fontFamily: 'Poppins', color: subTextColor, fontSize: 18),
                   ),
                 ],
               ).animate().fadeIn(duration: 400.ms),
@@ -182,11 +215,11 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
+                        color: shadowColor,
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -230,20 +263,20 @@ class _HomePageState extends State<HomePage> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
-                                          color: Colors.grey[600],
+                                          color: subTextColor,
                                           height: 1.4,
                                         ),
                                       ),
                                       const SizedBox(height: 16),
                                       Row(
                                         children: [
-                                          Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey[400]),
+                                          Icon(Icons.calendar_today_rounded, size: 14, color: subTextColor),
                                           const SizedBox(width: 6),
                                           Text(
                                             DateFormat('MMM dd, yyyy - hh:mm a').format(task.dueDate),
                                             style: TextStyle(
                                               fontFamily: 'Poppins', 
-                                              color: Colors.grey[500], 
+                                              color: subTextColor, 
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -288,20 +321,20 @@ class _HomePageState extends State<HomePage> {
                  .animate(delay: (index * 80).ms)
                  .fadeIn(duration: 500.ms)
                  .slideY(begin: 0.2, end: 0, duration: 500.ms, curve: Curves.easeOutQuart)
-                 .shimmer(delay: (index * 80 + 300).ms, duration: 1200.ms, color: Colors.white.withOpacity(0.5)),
+                 .shimmer(delay: (index * 80 + 300).ms, duration: 1200.ms, color: Colors.white.withOpacity(0.15)),
               );
             },
           );
-        }),
+        })(),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xff3c096c),
+        backgroundColor: gradientEnd,
         elevation: 6,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         onPressed: () => _showTaskForm(),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ).animate().scale(delay: 600.ms, duration: 500.ms, curve: Curves.easeOutBack),
-    );
+    ));
   }
 
   Widget _buildStatusBadge(TaskStatus status) {
@@ -328,11 +361,11 @@ class _HomePageState extends State<HomePage> {
     if (query.isEmpty) {
       return Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Color(0xff2A0A4A),
+          color: textColor,
         ),
       );
     }
@@ -347,11 +380,11 @@ class _HomePageState extends State<HomePage> {
     if (indexOfMatch == -1) {
       return Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Color(0xff2A0A4A),
+          color: textColor,
         ),
       );
     }
@@ -365,7 +398,7 @@ class _HomePageState extends State<HomePage> {
         text: title.substring(indexOfMatch, indexOfMatch + query.length),
         style: TextStyle(
           backgroundColor: const Color(0xffE0AAFF).withOpacity(0.5), 
-          color: const Color(0xff3c096c),
+          color: isDark ? Colors.white : const Color(0xff3c096c),
         ),
       ));
       
@@ -379,11 +412,11 @@ class _HomePageState extends State<HomePage> {
 
     return RichText(
       text: TextSpan(
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Color(0xff2A0A4A),
+          color: textColor,
         ),
         children: spans,
       ),

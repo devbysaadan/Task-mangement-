@@ -144,6 +144,7 @@ Widget continueBtn(){
         final box = GetStorage();
         box.write('isRegistered', true);
         box.write('userName', controller.usernameController.text);
+        box.write('avatar', controller.selectedAvatar.value);
 
         Get.offAll(() => const HomePage());      },
 
