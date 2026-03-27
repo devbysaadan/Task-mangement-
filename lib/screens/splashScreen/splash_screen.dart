@@ -33,13 +33,16 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xff3c096c),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Logo(),
-            Text('KaaJu',
+      body: SizedBox(
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Logo(),
+              Text('KaaJu',
             style: TextStyle(
               fontSize: 30,
               fontFamily: 'Poppins',
@@ -49,6 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ).animate().fadeIn(duration: 800.ms)
           ],
         ),
+      ),
       ),
     );
   }
