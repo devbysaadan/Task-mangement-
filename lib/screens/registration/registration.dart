@@ -91,7 +91,7 @@ class _AvatarIconState extends State<AvatarIcon> {
               )
             ),
             child: CircleAvatar(
-              radius: 80,
+              radius: 70,
                 child: Image(
                   image: AssetImage('assets/images/boy.png'),
                 ),
@@ -114,7 +114,7 @@ class _AvatarIconState extends State<AvatarIcon> {
               });
             },
             child: CircleAvatar(
-              radius: 80,
+              radius: 70,
                 child: Image(
                   image: AssetImage('assets/images/girl.png'),
                 ),
